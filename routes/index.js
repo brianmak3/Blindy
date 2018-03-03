@@ -546,7 +546,13 @@ module.exports = function (app) {
             console.log('okay');
         })
     }
+    app.get('/', function(req, res){
+        res.reder('index',{
+            title: 'Blindy Application page not found'
+        })
+    });
     app.post('/app_API', function (req, res) {
+        console.log(req.body);
         var module = req.body.module;
         if(module == 'login') {
             User.findOne({'Email': req.body.email.trim()}, function (err, user) {
