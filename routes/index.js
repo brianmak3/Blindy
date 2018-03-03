@@ -36,11 +36,11 @@ module.exports = function (app) {
     {
 
         socket.on('textsReady', function(data){
-                User.update({'userName': data.by, chats: {$elemMatch:{fromname: data.from}}},
-                    {$set: {'chats.$.unreadTexts': 0}}, {"multi": true}, function (err) {
-                        if (err)
-                            console.log(err);
-                    });
+            User.update({'userName': data.by, chats: {$elemMatch:{fromname: data.from}}},
+                {$set: {'chats.$.unreadTexts': 0}}, {"multi": true}, function (err) {
+                    if (err)
+                        console.log(err);
+                });
 
         });
         socket.on('sentMessage',function (data) {
@@ -88,8 +88,8 @@ module.exports = function (app) {
                         messageStor.index = lastMessNumber;
                         messageStor.lastMessage = data.lastMessage;
                         messageStor.save(function (err) {
-                           if(err)
-                               throw err;
+                            if(err)
+                                throw err;
                         });
                         User.update({'userName':data.fromname},
                             {$pull:{chats:{'fromname':data.toname}}},
@@ -201,106 +201,106 @@ module.exports = function (app) {
             User.update({'userName': data.username, 'friends.name': data.friendName},
                 { $set: { "friends.$.status" : 'friend' } },
                 function(err){
-                if(err)
-                    throw err;
-                else{
-                    socket.emit('friendUpdated', {info: data});
-                }
-            });
+                    if(err)
+                        throw err;
+                    else{
+                        socket.emit('friendUpdated', {info: data});
+                    }
+                });
             User.update({'userName': data.friendName, 'friends.name': data.username},
                 { $set: { "friends.$.status" : 'friend' } },
                 function(err){
-                if(err)
-                    throw err;
-                else{
-                    socket.broadcast.emit('friendUpdated', {info: data});
-                }
-            });
+                    if(err)
+                        throw err;
+                    else{
+                        socket.broadcast.emit('friendUpdated', {info: data});
+                    }
+                });
 
 
         });
         socket.on('NewMessage', function (data) {
-                     var gettime = getTime();
-                    var messageStor = new Message();
-                    messageStor.fromname = data.myInfo.user_username,
-                    messageStor.toname =data.friendInfo.userName,
-                    messageStor.date = gettime[0];
-                    messageStor.time = gettime[1];
-                    messageStor.lastMessage = data.message,
-                    messageStor.dateMic = gettime[2];
-                    messageStor.deleteFrom = false ;
-                    messageStor.deleteTo = false;
-                    messageStor.index = 0;
-                    messageStor.save(function (err) {
-                        if(err)
-                            throw err;
-                    });
+            var gettime = getTime();
+            var messageStor = new Message();
+            messageStor.fromname = data.myInfo.user_username,
+                messageStor.toname =data.friendInfo.userName,
+                messageStor.date = gettime[0];
+            messageStor.time = gettime[1];
+            messageStor.lastMessage = data.message,
+                messageStor.dateMic = gettime[2];
+            messageStor.deleteFrom = false ;
+            messageStor.deleteTo = false;
+            messageStor.index = 0;
+            messageStor.save(function (err) {
+                if(err)
+                    throw err;
+            });
 
 
-             var info = {
-                 image:data.friendInfo.Profile_pic,
-                 toname: data.friendInfo.userName,
-                 fromname: data.myInfo.user_username,
-                 lastMessage: data.message,
-                 time: gettime[1],
-                 date: gettime[0],
-                 unreadTexts: 0,
-                 lastMessNumber: 0
+            var info = {
+                image:data.friendInfo.Profile_pic,
+                toname: data.friendInfo.userName,
+                fromname: data.myInfo.user_username,
+                lastMessage: data.message,
+                time: gettime[1],
+                date: gettime[0],
+                unreadTexts: 0,
+                lastMessNumber: 0
 
-             };
+            };
 
-             var data1 = {
-                 'image':data.friendInfo.Profile_pic,
-                 'toname':  data.friendInfo.userName,
-                 'fromname': data.myInfo.user_username,
-                 'lastMessage': data.message,
-                 'time': gettime[1],
-                 'date': gettime[0],
-                 'dateMic': gettime[2],
-                 'unreadTexts': 0,
-                 'block': false,
-                 'lastMessNumber': 0
-             };
-             User.update({'userName':info.fromname}, {$push: {chats:data1}},function(err){
-                 if(err)
-                     throw err;
-                 socket.emit('addChat',info);
+            var data1 = {
+                'image':data.friendInfo.Profile_pic,
+                'toname':  data.friendInfo.userName,
+                'fromname': data.myInfo.user_username,
+                'lastMessage': data.message,
+                'time': gettime[1],
+                'date': gettime[0],
+                'dateMic': gettime[2],
+                'unreadTexts': 0,
+                'block': false,
+                'lastMessNumber': 0
+            };
+            User.update({'userName':info.fromname}, {$push: {chats:data1}},function(err){
+                if(err)
+                    throw err;
+                socket.emit('addChat',info);
 
-             });
-             var info2 = {
-                 image:data.myInfo.user_profileImage,
-                 fromname: data.myInfo.user_username,
-                 toname: data.friendInfo.userName,
-                 lastMessage: data.message,
-                 time: gettime[1],
-                 date: gettime[0],
-                 unreadTexts: 1,
-                 lastMessNumber: 0
-             };
+            });
+            var info2 = {
+                image:data.myInfo.user_profileImage,
+                fromname: data.myInfo.user_username,
+                toname: data.friendInfo.userName,
+                lastMessage: data.message,
+                time: gettime[1],
+                date: gettime[0],
+                unreadTexts: 1,
+                lastMessNumber: 0
+            };
 
-             var data2={
-                 'image':data.myInfo.user_profileImage,
-                 'fromname': data.myInfo.user_username,
-                 'toname': data.friendInfo.userName,
-                 'lastMessage': data.message,
-                 'time': gettime[1],
-                 'date': gettime[0],
-                 'dateMic': gettime[2],
-                 'unreadTexts': 1,
-                 'block': false,
-                 'lastMessNumber': 0
+            var data2={
+                'image':data.myInfo.user_profileImage,
+                'fromname': data.myInfo.user_username,
+                'toname': data.friendInfo.userName,
+                'lastMessage': data.message,
+                'time': gettime[1],
+                'date': gettime[0],
+                'dateMic': gettime[2],
+                'unreadTexts': 1,
+                'block': false,
+                'lastMessNumber': 0
 
-             };
-             User.update({'userName':info2.toname}, {$push: {chats:data2}},function(err){
-                 if(err)
-                     throw err;
-                 socket.broadcast.emit('addChat',info2);
-             });
-
-
+            };
+            User.update({'userName':info2.toname}, {$push: {chats:data2}},function(err){
+                if(err)
+                    throw err;
+                socket.broadcast.emit('addChat',info2);
+            });
 
 
-         });
+
+
+        });
         //messages issue
         socket.on('fetchTexts2',function(data){
             Message.find({
@@ -321,7 +321,7 @@ module.exports = function (app) {
                 if (err) {
                     throw err;
                 }else{
-                 socket.emit("userInfoFound", {infor: user});
+                    socket.emit("userInfoFound", {infor: user});
                 }
             })
         });
@@ -345,33 +345,33 @@ module.exports = function (app) {
                             friendStatus = 'Not friend';
                         }
                         if(parseInt(data.lastMessNumber) == 0)
-                            {
-                                Message.find({
-                                    $or: [{'fromname': data.from, 'toname': data.friend},
-                                        {'toname': data.from, 'fromname': data.friend}]
-                                }, function (err, messages) {
-                                    if (err)
-                                        throw err;
-                                    socket.emit('foundMessages', {
-                                        messages: messages,
-                                        friendStatus: friendStatus,
-                                        friendShip: friendShip
-                                    });
+                        {
+                            Message.find({
+                                $or: [{'fromname': data.from, 'toname': data.friend},
+                                    {'toname': data.from, 'fromname': data.friend}]
+                            }, function (err, messages) {
+                                if (err)
+                                    throw err;
+                                socket.emit('foundMessages', {
+                                    messages: messages,
+                                    friendStatus: friendStatus,
+                                    friendShip: friendShip
                                 });
-                            }else if(parseInt(data.lastMessNumber) > 0) {
-                                Message.find({
-                                    $or: [{'fromname': data.from, 'toname': data.friend, index: { $lte: data.lastMessNumber }},
-                                        {'toname': data.from, 'fromname': data.friend, index: { $lte: data.lastMessNumber } }]
-                                }, function (err, messages) {
-                                    if (err)
-                                        throw err;
-                                    messages = messages.reverse();
-                                    socket.emit('foundMessages', {
-                                        messages: messages,
-                                        friendStatus: friendStatus,
-                                        friendShip: friendShip
-                                    });
-                                }).sort({ $natural: -1 }).limit(20);
+                            });
+                        }else if(parseInt(data.lastMessNumber) > 0) {
+                            Message.find({
+                                $or: [{'fromname': data.from, 'toname': data.friend, index: { $lte: data.lastMessNumber }},
+                                    {'toname': data.from, 'fromname': data.friend, index: { $lte: data.lastMessNumber } }]
+                            }, function (err, messages) {
+                                if (err)
+                                    throw err;
+                                messages = messages.reverse();
+                                socket.emit('foundMessages', {
+                                    messages: messages,
+                                    friendStatus: friendStatus,
+                                    friendShip: friendShip
+                                });
+                            }).sort({ $natural: -1 }).limit(20);
 
                         }
 
@@ -384,7 +384,7 @@ module.exports = function (app) {
 
         //reported message
         socket.on('sendRport',function (data) {
-           console.log(data);
+            console.log(data);
 
         });
         socket.on('callResponse', function(data){
@@ -406,21 +406,21 @@ module.exports = function (app) {
                         "$push":  "$friends"
                     }
                 }}
-                ]).exec(function (err, results) {
-                    if(err)
-                       throw err;
-                    else{
-                        if(results[0]) {
+            ]).exec(function (err, results) {
+                if(err)
+                    throw err;
+                else{
+                    if(results[0]) {
 
-                            socket.emit('foundFriends', {friends: results[0].friends});
-                        }
+                        socket.emit('foundFriends', {friends: results[0].friends});
                     }
+                }
 
             });
         });
         socket.on('endCall', function(data){
-           socket.emit('callEnd', {data: data});
-           socket.broadcast.emit('callEnd', {data: data});
+            socket.emit('callEnd', {data: data});
+            socket.broadcast.emit('callEnd', {data: data});
         });
         socket.on('frendManipulation',function(data) {
             var module = data.module;
@@ -488,17 +488,17 @@ module.exports = function (app) {
             }
         });
         socket.on('profileImage', function(data){
-           var imageName = data.image.split('uploads/');
-           var image = 'uploads/'+imageName[1];
+            var imageName = data.image.split('uploads/');
+            var image = 'uploads/'+imageName[1];
             User.update({  friends: { $elemMatch: { name: data.username } }},
                 {$set: { "friends.$.image" : image }},
                 { multi: true },
                 function(err){
-                if(err)
-                     throw err;
+                    if(err)
+                        throw err;
                 })
             User.update({ 'userName': {$ne: data.username},
-                chats: { $elemMatch:  {$or:[{toname: data.username },{fromname: data.username }]} }},
+                    chats: { $elemMatch:  {$or:[{toname: data.username },{fromname: data.username }]} }},
                 {$set: { "chats.$.image" : image }},
                 { multi: true },
                 function(err){
@@ -512,20 +512,20 @@ module.exports = function (app) {
     });
     function updateBlock(data, socket){
 
-          if(data.module == 'Block'){
-              var blocking = new Block() ;
-               blocking.blockby = data.requestFrom;
-               blocking.blockto = data.requestTo;
-               blocking.save(function(err){
-                   if(err)
-                       throw err;
-               })
-          }else if(data.module == 'Unblock'){
-              Block.remove({'blockby': data.requestFrom, 'blockto': data.requestTo},function (err) {
-                  if(err)
-                      throw err;
-              });
-          }
+        if(data.module == 'Block'){
+            var blocking = new Block() ;
+            blocking.blockby = data.requestFrom;
+            blocking.blockto = data.requestTo;
+            blocking.save(function(err){
+                if(err)
+                    throw err;
+            })
+        }else if(data.module == 'Unblock'){
+            Block.remove({'blockby': data.requestFrom, 'blockto': data.requestTo},function (err) {
+                if(err)
+                    throw err;
+            });
+        }
         socket.broadcast.emit('BlockFriend', {Info: data});
         socket.emit('BlockFriend', {Info: data});
     }
@@ -546,14 +546,7 @@ module.exports = function (app) {
             console.log('okay');
         })
     }
-    app.get('/', function(req, res){
-        res.render('index',{
-            title: 'Blindy Application page not found'
-        })
-    });
     app.post('/app_API', function (req, res) {
-        console.log(req.body);
-        var module = req.body.module;
         if(module == 'login') {
             User.findOne({'Email': req.body.email.trim()}, function (err, user) {
                 if (err) {
@@ -561,14 +554,14 @@ module.exports = function (app) {
                 }else if (!user) {
                     res.json(["The email you entered is not registered."]);
                 } else if (user) {
-                   if (!user.validPassword(req.body.pass)) {
+                    if (!user.validPassword(req.body.pass)) {
                         res.json(["Invalid password entry."]);
                     }else {
-                       if(user.Status !== 'Active'){
-                           res.json(["verifyEmail"]);
-                       }else {
-                           res.json(["SuccessLogin",user]);
-                       }
+                        if(user.Status !== 'Active'){
+                            res.json(["verifyEmail"]);
+                        }else {
+                            res.json(["SuccessLogin",user]);
+                        }
                     }
                 }
             });
@@ -579,17 +572,21 @@ module.exports = function (app) {
                 if (err)
                     throw err;
                 else if (user) {
+                    console.log('user');
                     res.json("Sorry, the email is already registered.");
                 } else if (!user) {
                     User.findOne({'userName':req.body.username},function (err, results) {
                         if (err)
                             throw err;
                         if(results){
+                            console.log('no usre');
                             res.json("Sorry, the username is already registered.");
                         }else {
+                            console.log('user found');
+
                             User.find({}).exec(function (err, results2) {
                                 if(err)
-                                     throw err;
+                                    throw err;
                                 else {
                                     var user_id = results2.length + 1;
                                     var newUser = new User();
@@ -674,22 +671,22 @@ module.exports = function (app) {
                         res.json("EmailFound");
                         var random_number = Math.floor((Math.random()) * (999999 - 100000)) + 100000;
                         User.update({'Email': req.body.email},{$set: {'PassCode':random_number}},function(err){
-                                if(err)
-                                    throw err;
-                                else{
-                                    var mailOptions = {
-                                        from: 'Blindy dating platform',
-                                        to: req.body.email,
-                                        subject: 'Account password reset.✔',
-                                        html: 'You requested for a change in your password<br/>Please enter this verification code in order to reset your password.<br/><strong>' + random_number + '</strong>'
-                                    };
-                                    transporter.sendMail(mailOptions, function (error) {
-                                        if (error) {
-                                            console.log(error);
-                                        }
+                            if(err)
+                                throw err;
+                            else{
+                                var mailOptions = {
+                                    from: 'Blindy dating platform',
+                                    to: req.body.email,
+                                    subject: 'Account password reset.✔',
+                                    html: 'You requested for a change in your password<br/>Please enter this verification code in order to reset your password.<br/><strong>' + random_number + '</strong>'
+                                };
+                                transporter.sendMail(mailOptions, function (error) {
+                                    if (error) {
+                                        console.log(error);
+                                    }
 
-                                    });
-                                }
+                                });
+                            }
                         });
 
                     }else{
@@ -702,22 +699,22 @@ module.exports = function (app) {
             User.findOne({'Email':req.body.userEmail, 'PassCode': req.body.code},function (err, user) {
                 if(err)
                     throw err;
-                 if(!user){
+                if(!user){
                     res.json('Invalid code submitted');
                 }else{
                     res.json('EmailFound with Verification');
                 }
             });
         }else if(module === 'updatePassword'){
-             var newUser = new User();
-               newUser.Password = newUser.generatHarsh(req.body.password);
+            var newUser = new User();
+            newUser.Password = newUser.generatHarsh(req.body.password);
             User.update({'Email':req.body.userEmail},{$set: {Password:  newUser.Password}},function (err) {
                 if(err)
                     throw err;
                 else{
                     User.findOne({'Email': req.body.userEmail},function (err, user) {
                         if(err)
-                             throw err;
+                            throw err;
                         else{
                             res.json(user);
                         }
@@ -776,7 +773,7 @@ module.exports = function (app) {
 
 
         }else if(module ==='fetchAny'){
-             var friends = [];
+            var friends = [];
             User.findOne({'userName': req.body.username}, function (err, user) {
                 if (err) {
                     throw err;
@@ -796,8 +793,8 @@ module.exports = function (app) {
                             'gender': {$ne: user.gender}
                         }
                     }, {$sample: {size: 1}}]).exec(function (err, results) {
-                            if(err)
-                                throw err;
+                        if(err)
+                            throw err;
                         if (results.length>0) {
                             res.json(results[0]);
                         } else {
@@ -812,7 +809,7 @@ module.exports = function (app) {
                         }
                     }, {$sample: {size: 1}}]).exec(function (err, results) {
                         if(err)
-                             throw err;
+                            throw err;
                         if (results.length>0) {
                             res.json(results[0]);
                         } else {
@@ -824,12 +821,12 @@ module.exports = function (app) {
             })
         }else if(module == 'fetchSpecific'){
             var friends = [];
-           var info = req.body;
-           var userName = info.username;
-           var country = info.country;
-           var city = info.city;
-           var age = info.age;
-           var intention = info.intention;
+            var info = req.body;
+            var userName = info.username;
+            var country = info.country;
+            var city = info.city;
+            var age = info.age;
+            var intention = info.intention;
             User.findOne({'userName':userName}, function (err, user) {
                 if (err) {
                     throw err;
@@ -865,8 +862,8 @@ module.exports = function (app) {
                             'country': country
                         }
                     }, {$sample: {size: 1}}]).exec(function (err, results) {
-                            if(err)
-                                throw err;
+                        if(err)
+                            throw err;
 
                         if (results.length>0) {
                             res.json(results[0]);
@@ -904,21 +901,21 @@ module.exports = function (app) {
                 console.log(err);
             else
                 var profile_pic_url = 'uploads/'+req.file.filename;
-          var userName = req.body.username.trim();
-          console.log(userName);
+            var userName = req.body.username.trim();
+            console.log(userName);
             res.status(201).json(profile_pic_url);
-          User.findOne({'userName': userName},function(err, user){
+            User.findOne({'userName': userName},function(err, user){
                 if(err)
                     throw err;
                 else{
 
-                  var imageurl = user.Profile_pic;
-                  var imagefolder = imageurl.split('/');
+                    var imageurl = user.Profile_pic;
+                    var imagefolder = imageurl.split('/');
 
-                  if(imagefolder[0]=='uploads'){
-                      fs.unlink('public/'+imageurl, function(){
-                      });
-                  }
+                    if(imagefolder[0]=='uploads'){
+                        fs.unlink('public/'+imageurl, function(){
+                        });
+                    }
                 }
             });
             User.update({'userName': userName}, {$set: {'Profile_pic': profile_pic_url}},function(err) {
@@ -926,10 +923,10 @@ module.exports = function (app) {
                     throw err;
             });
             User.update({chats:{$elemMatch: {$or: [{fromname: userName},{toname: userName}]}}}, {$set: {'image': profile_pic_url}},
-            function(err){
-                if(err)
-                    throw err;
-            });
+                function(err){
+                    if(err)
+                        throw err;
+                });
             User.update({friends:{$elemMatch: {'name': userName}}}, {$set: {'image': profile_pic_url}},
                 function(err){
                     if(err)
