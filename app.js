@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 var cors = require('cors');
 var mongoose = require('mongoose');
 var configDb = require('./config/database.js');
-mongoose.connect(configDb.url, {useMongoClient: true});
+mongoose.connect(configDb.url);
 var app = express();
 
 
