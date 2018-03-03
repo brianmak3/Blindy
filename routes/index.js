@@ -547,7 +547,7 @@ module.exports = function (app) {
         })
     }
     app.get('/', function(req, res){
-        res.reder('index',{
+        res.render('index',{
             title: 'Blindy Application page not found'
         })
     });
